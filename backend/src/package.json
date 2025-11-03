@@ -1,0 +1,34 @@
+{
+  "name": "iti922-proyecto-1",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GuoliangLi9104/ITI922-Proyecto-1.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/GuoliangLi9104/ITI922-Proyecto-1/issues"
+  },
+  "homepage": "https://github.com/GuoliangLi9104/ITI922-Proyecto-1#readme",
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.20.0",
+    "mongoose": "^8.19.2",
+    "multer": "^2.0.2"
+  },
+  "devDependencies": {
+    "eslint": "^9.38.0",
+    "nodemon": "^3.1.10"
+  }
+}

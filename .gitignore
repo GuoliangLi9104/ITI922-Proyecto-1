@@ -1,0 +1,92 @@
+# ==========================================
+# 🌐 Node.js / Backend + Frontend
+# Proyecto: ITI922-Proyecto-1
+# ==========================================
+
+# 📦 Dependencias
+node_modules/
+frontend/node_modules/
+backend/node_modules/
+
+# 🧩 Builds / compilaciones
+dist/
+build/
+frontend/dist/
+frontend/build/
+backend/dist/
+backend/build/
+
+# ⚙️ Entornos / Configuración sensible
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 🔐 Archivos con claves o secretos
+*.pem
+*.key
+*.crt
+*.cert
+*.p12
+*.pfx
+*.bak
+*.log
+
+# 🗃️ Archivos del sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 💾 IDEs y entornos locales
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# 🧰 Logs y temporales
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# 📁 Backups temporales
+*.tmp
+*.temp
+*.cache
+*.old
+
+# ⚡ Archivos de cobertura y pruebas
+coverage/
+.nyc_output/
+jest-html-reporters-*
+test-results/
+__tests__/
+__mocks__/
+
+# 🧪 Archivos de procesos
+.pids
+*.pid
+*.seed
+*.pid.lock
+
+# ⚙️ Configuración OS o editor
+*.iml
+*.vs/
+*.idea/
+*.history/
+*.orig
+
+# 📦 Archivos comprimidos o exportaciones
+*.zip
+*.tar
+*.gz
+*.rar
+
+# ==========================================
+# ✅ Fin del archivo .gitignore
+# ==========================================
