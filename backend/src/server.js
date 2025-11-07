@@ -1,7 +1,8 @@
 // server.js
-require('dotenv').config({ path: './.env' });
-const express = require('express');
 const path = require('path');
+const fs = require('fs');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
+const express = require('express');
 const connectDB = require('./config/db');
 const routes = require('./routes');
 const cors = require('cors');
@@ -24,9 +25,12 @@ app.use(express.urlencoded({ extended: true }));
 // ==============================
 // 🖼️ Servir carpeta de imágenes locales
 // ==============================
+const uploadsDir = path.join(__dirname, 'uploads');
+const productImagesDir = path.join(uploadsDir, 'products');
+fs.mkdirSync(productImagesDir, { recursive: true }); // ensure static dir exists even before first upload
 // Esto hace que se pueda acceder a:
 // http://localhost:3000/uploads/products/archivo.jpg
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(uploadsDir));
 
 // ==============================
 // 🚀 Ruta base de prueba

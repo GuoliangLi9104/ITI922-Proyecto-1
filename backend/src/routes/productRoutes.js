@@ -3,12 +3,16 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 const productController = require('../controllers/productController');
 
 // Configurar almacenamiento local
+const uploadDir = path.join(__dirname, '../uploads/products');
+fs.mkdirSync(uploadDir, { recursive: true }); // prevent ENOENT when saving first upload
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '../uploads/products'));
+    cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
     const uniqueName = Date.now() + '-' + file.originalname;
