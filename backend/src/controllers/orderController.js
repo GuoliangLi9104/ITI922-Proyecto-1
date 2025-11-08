@@ -5,11 +5,22 @@ const { Order } = require('../models');
 // Crear orden
 exports.createOrder = async (req, res) => {
   try {
-    const { userId, items, total, shippingAddress, status = 'pending' } = req.body;
-    if (!userId || !items || !Array.isArray(items) || items.length === 0) {
-      return res.status(400).json({ error: 'userId y items (array) son requeridos' });
+    const { userId, items, products: productsFromBody, total, shippingAddress, paymentMethod = 'cash' } = req.body;
+    const productList = Array.isArray(items) && items.length ? items : productsFromBody;
+    if (!userId || !Array.isArray(productList) || productList.length === 0) {
+      return res.status(400).json({ error: 'userId y lista de productos requerida' });
     }
-    const order = new Order({ userId, items, total, shippingAddress, status, createdAt: new Date() });
+    if (typeof total !== 'number') {
+      return res.status(400).json({ error: 'total numérico requerido' });
+    }
+    const order = new Order({
+      userId,
+      products: productList,
+      total,
+      shippingAddress,
+      paymentMethod,
+      status: 'pending'
+    });
     await order.save();
     res.status(201).json({ message: 'Orden creada', order });
   } catch (error) {
